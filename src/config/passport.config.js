@@ -64,21 +64,27 @@ const initalizatePassport = () => {
         }
     }))
 
-    passport.use('login', new localStrategy({usernameField:'email'}, async (username, password, done) => {
-        try {
-            const user = await userModel.findOne({email: username})
-            if(user && validatePassword(password, user.password)) {
-                return done(null, user)
-            } else {
-                return done(null, false)
+    passport.use(
+        "login",
+        new localStrategy(
+            {
+                usernameField: "email", // Campo del formulario para el email
+                passwordField: "password", // Campo del formulario para la contraseña
+            },
+            async (email, password, done) => {
+                try {
+                    const user = await userModel.findOne({ email });
+                    if (!user || !validatePassword(password, user.password)) {
+                        return done(null, false, { message: "Credenciales inválidas" });
+                    }
+                    return done(null, user); // Usuario válido
+                } catch (error) {
+                    return done(error);
+                }
             }
-        }catch(e){
-            return done(e)
-        }
-
-        
+        )
+    );
     
-    }))
 
     passport.use('github', new GithubStrategy({
         clientID: "Iv23liOfjqWba4KcrJxi",
@@ -134,9 +140,13 @@ const initalizatePassport = () => {
     })
 
     passport.deserializeUser(async (id, done) => {
-        const user = await userModel.findById(id)
-        done(null, user)
-    })
+        try {
+            const user = await userModel.findById(id);
+            done(null, user);
+        } catch (error) {
+            done(error);
+        }
+    });
 
 }
 

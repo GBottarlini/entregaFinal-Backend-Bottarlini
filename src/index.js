@@ -22,16 +22,23 @@ app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-    store: MongoStore.create({
-        mongoUrl: "mongodb+srv://bottarlini99:dKYARPesZY2KkBPW@coder.ucsnn.mongodb.net/?retryWrites=true&w=majority&appName=coder",
-        mongoOptions: {},
-        ttl: 15
-    }),
-    secret: 'SessionSecret',
-    resave: true,
-    saveUninitialized: true
-}))
+app.use(
+    session({
+        store: MongoStore.create({
+            mongoUrl: "mongodb+srv://bottarlini99:dKYARPesZY2KkBPW@coder.ucsnn.mongodb.net/?retryWrites=true&w=majority&appName=coder", // URL de MongoDB
+            mongoOptions: {}, // Opciones adicionales de MongoDB
+            ttl: 15 * 60, // Tiempo de vida de la sesión en segundos (15 minutos)
+        }),
+        secret: "SessionSecret", // Clave secreta para firmar la sesión
+        resave: false, // Evita guardar la sesión si no ha cambiado
+        saveUninitialized: false, // Evita guardar sesiones no inicializadas
+        cookie: {
+            maxAge: 15 * 60 * 1000, // Tiempo de vida de la cookie en milisegundos (15 minutos)
+            httpOnly: true, // La cookie solo es accesible desde el servidor
+            secure: false, // Cambiar a true en producción con HTTPS
+        },
+    })
+);  
 
 mongoose.connect("mongodb+srv://bottarlini99:dKYARPesZY2KkBPW@coder.ucsnn.mongodb.net/?retryWrites=true&w=majority&appName=coder")
 .then(() => console.log("DB is connected"))
